@@ -446,23 +446,19 @@ class PropelPDO extends PDO
      *
      * @see       http://php.net/manual/en/pdo.query.php for a description of the possible parameters.
      *
-     * @return PDOStatement
+     * @return PDOStatement|false
      */
-    public function query()
+    #[ReturnTypeWillChange]
+    public function query(string $query, ?int $fetchMode = null, ...$fetchModeArgs)
     {
         if ($this->useDebug) {
             $debug = $this->getDebugSnapshot();
         }
 
-        $args = func_get_args();
-        if (version_compare(PHP_VERSION, '5.3', '<')) {
-            $return = call_user_func_array(array($this, 'parent::query'), $args);
-        } else {
-            $return = call_user_func_array('parent::query', $args);
-        }
+        $return = parent::query($query, $fetchMode, ...$fetchModeArgs);
 
         if ($this->useDebug) {
-            $sql = $args[0];
+            $sql = $query;
             $this->log($sql, null, __METHOD__, $debug);
             $this->setLastExecutedQuery($sql);
             $this->incrementQueryCount();
